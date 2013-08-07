@@ -1,7 +1,7 @@
 {
   "name": "i18n",
   "description": "lightweight simple translation module with dynamic json storage",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "http://github.com/ohardy/node-i18n",
   "repository": {
     "type": "git",
@@ -19,6 +19,7 @@
   "dependencies": {
     "sprintf": ">=0.1.1",
     "underscore.string": "*",
+    "lodash": "*",
     "erouter": "git://github.com/ohardy/node-erouter.git#master"
   },
   "devDependencies": {

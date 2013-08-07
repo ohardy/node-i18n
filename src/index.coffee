@@ -15,6 +15,7 @@ options =
   defaultLocale:  "en"
   updateFiles:    true
   verbose:        true
+  onlyCache:      false
 
 module.exports = exports = i18n = {}
 
@@ -110,10 +111,14 @@ i18n.expressBind = (app, opts) ->
   #     console.log 'Orig : ', route.path._orig
   app._router = router
 
-  app.use i18n.express opts
+  app.use i18n.express app, opts
 
-i18n.express = (opts = {}) ->
+i18n.express = (app, opts = {}) ->
   options.guessLocale = true
+
+  if app.get('env') is 'production'
+    options.updateFiles = false
+    options.onlyCache   = true
 
   regexp1 = new RegExp("^/(" + options.locales.join('|') + ")$")
   regexp2 = new RegExp("^/(" + options.locales.join('|') + ")/")
@@ -203,9 +208,18 @@ i18n.guessLocale = (request) ->
 translate = (locale, singular, plural, none) ->
   if not locale?
     locale = options.defaultLocale
-  read locale  unless options.locales[locale]
-  setForLocales singular, plural, none
-  options.locales[locale][singular]
+
+  if not options.onlyCache or options.updateFiles
+    read locale  unless options.locales[locale]
+
+  if options.updateFiles
+    setForLocales singular, plural, none
+
+  localeDict = options.locales[locale]
+  unless localeDict?
+    console.log 'Error : ', locale, singular
+  else
+    localeDict[singular]
 
 setForLocales = (singular, plural, none) ->
   if debug
