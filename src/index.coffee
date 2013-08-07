@@ -1,4 +1,5 @@
 _s        = require 'underscore.string'
+_         = require 'lodash'
 fs        = require 'fs'
 # util      = require 'util'
 path      = require 'path'
@@ -102,17 +103,21 @@ lurlForFor = (request) ->
 
 i18n.expressBind = (app, opts) ->
   router = new Router app
-  console.log ' router : ', router
-  router.on 'add-route', (route) ->
-    console.log 'added route :', route.method, route.path
-    if route.path._orig?
-      console.log 'Orig : ', route.path._orig
+  # console.log ' router : ', router
+  # router.on 'add-route', (route) ->
+  #   console.log 'added route :', route.method, route.path
+  #   if route.path._orig?
+  #     console.log 'Orig : ', route.path._orig
   app._router = router
 
   app.use i18n.express opts
 
 i18n.express = (opts = {}) ->
   options.guessLocale = true
+
+  regexp1 = new RegExp("^/(" + options.locales.join('|') + ")$")
+  regexp2 = new RegExp("^/(" + options.locales.join('|') + ")/")
+
   (req, res, next) ->
     req.__s     = singularFor req
     req.__p     = pluralFor req
@@ -127,13 +132,13 @@ i18n.express = (opts = {}) ->
     res.locals.req     = req
 
     delete req._parsedUrl
-    for l of options.locales
-      regexp1 = new RegExp("^/#{l}$")
-      regexp2 = new RegExp("^/#{l}/")
-      if req.url.match(regexp1) or req.url.match(regexp2)
-        i18n.setLocale req, l
-        req.url = req.url.slice(l.length + 1)
-        break
+
+    match = req.url.match(regexp1) or req.url.match(regexp2)
+
+    if match
+      l = match[1]
+      i18n.setLocale req, l
+      req.url = req.url.slice(l.length + 1)
 
     if not req.locale?
       i18n.guessLocale req
@@ -143,8 +148,6 @@ i18n.express = (opts = {}) ->
       res.redirect urlForFor(req)(newUrl)
     else
       next()
-
-
 
 i18n.setLocale = (arg1, arg2) ->
   request = `undefined`
@@ -205,9 +208,11 @@ translate = (locale, singular, plural, none) ->
   options.locales[locale][singular]
 
 setForLocales = (singular, plural, none) ->
+  if debug
+    console.log 'setForLocales : ', singular, plural, none
   for locale in options.locales
     if plural
-      unless options.locales[locale][singular]?
+      unless options.locales[locale][singular]
         options.locales[locale][singular] =
           one: singular
           other: plural
@@ -215,7 +220,7 @@ setForLocales = (singular, plural, none) ->
 
         write locale
     else
-      unless options.locales[locale][singular]?
+      unless options.locales[locale][singular]
         options.locales[locale][singular] = singular
       write locale
 
@@ -244,8 +249,12 @@ read = (locale) ->
 
 write = (locale, dontRead = false) ->
   # don't write new locale information to disk if updateFiles isn't true
+  savedLocale = options.locales[locale] ?= {}
   unless dontRead
     read locale
+    _.merge(savedLocale, options.locales[locale])
+    options.locales[locale] = savedLocale
+
   return  unless options.updateFiles
 
   # creating directory if necessary
@@ -255,9 +264,6 @@ write = (locale, dontRead = false) ->
     if debug
       console.log "creating locales dir in: #{directory}"  if debug
     fs.mkdirSync directory, 0o0755
-
-  # first time init has an empty file
-  options.locales[locale] ?= {}
 
   # writing to tmp and rename on success
   try
