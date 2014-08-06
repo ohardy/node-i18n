@@ -1,11 +1,14 @@
 {
   "name": "i18n",
   "description": "lightweight simple translation module with dynamic json storage",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "homepage": "http://github.com/ohardy/node-i18n",
   "repository": {
     "type": "git",
     "url": "http://github.com/ohardy/node-i18n.git"
+  },
+  "scripts": {
+    "postinstall": "cake build"
   },
   "private": true,
   "author": {
