@@ -8,7 +8,7 @@
     "url": "http://github.com/ohardy/node-i18n.git"
   },
   "scripts": {
-    "postinstall": "cake build"
+    "postinstall": "./node_modules/.bin/cake build"
   },
   "private": true,
   "author": {
@@ -20,10 +20,11 @@
     "lib": "."
   },
   "dependencies": {
-    "sprintf": ">=0.1.1",
-    "underscore.string": "*",
+    "coffee-script": "^1.7.1",
+    "erouter": "git://github.com/ohardy/node-erouter.git#master",
     "lodash": "*",
-    "erouter": "git://github.com/ohardy/node-erouter.git#master"
+    "sprintf": ">=0.1.1",
+    "underscore.string": "*"
   },
   "devDependencies": {
     "mocha": "*",
