@@ -138,6 +138,8 @@ i18n.express = (app, opts = {}) ->
 
     delete req._parsedUrl
 
+    console.log 'req.url._orig : ', req.url._orig
+
     match = req.url.match(regexp1) or req.url.match(regexp2)
 
     if match
